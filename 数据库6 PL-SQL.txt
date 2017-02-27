@@ -1,0 +1,273 @@
+PL/SQL编程
+--打开sqlplus的输出
+set serveroutput on
+最简单的只有begin和end块,最后使用/执行
+
+SQL> begin
+  2  dbms_output.put_line('Hello world');
+  3  end;
+  4  /
+Hello world
+
+PL/SQL 过程已成功完成。
+
+
+结构：
+[decalare
+...]
+begin
+...
+[exception]
+...
+end;
+/
+
+例子1：
+SQL> declare
+  2  vCount number := 0;
+  3  begin
+  4  select count(*) into vCount
+  5  from emp;
+  6  dbms_output.put_line('total num is '|| vCount);
+  7  end;
+  8  /
+total num is 14
+
+PL/SQL 过程已成功完成。
+
+
+例子2：异常
+（1）当存在SCOTT的时候正常打印工资
+SQL> declare
+  2     vSal number := 0;
+  3  begin
+  4     select sal into vSal
+  5     from emp where ename='SCOTT';
+  6     dbms_output.put_line('sal is '|| vSal);
+  7  exception
+  8     when too_many_rows then
+  9             dbms_output.put_line('too many rows!');
+ 10     when no_data_found then
+ 11             dbms_output.put_line('no data found!');
+ 12     when others then
+ 13             dbms_output.put_line('other error!');
+ 14  end;
+ 15  /
+sal is 3000
+
+PL/SQL 过程已成功完成。
+
+PL/SQL 过程已成功完成。
+
+（2）当不存在CAY的时候，进入异常
+SQL> declare
+  2     vSal number := 0;
+  3  begin
+  4     select sal into vSal
+  5     from emp where ename='CAY';
+  6     dbms_output.put_line('sal is '|| vSal);
+  7  exception
+  8     when too_many_rows then
+  9             dbms_output.put_line('too many rows!');
+ 10     when no_data_found then
+ 11             dbms_output.put_line('no data found!');
+ 12     when others then
+ 13             dbms_output.put_line('other error!');
+ 14  end;
+ 15  /
+no data found!
+
+PL/SQL 过程已成功完成。
+
+
+--show error：显示错误信息
+输入参数：in
+输出参数：out
+
+
+--函数：必须有return，在sql语句中才生效
+SQL> create or replace function tax(pSal number) return number
+  2  is
+  3     vRes number := 0;
+  4  begin
+  5     if(pSal < 1000) then
+  6             vRes := 0;
+  7     elsif(pSal < 2000) then
+  8             vRes := pSal * 0.01;
+  9     elsif(pSal < 3000) then
+ 10             vRes := pSal * 0.02;
+ 11     else
+ 12             vRes := pSal * 0.04;
+ 13     end if;
+ 14     return vRes;
+ 15  end;
+ 16  /
+
+函数已创建。
+
+调用上面的函数
+SQL> select ename,sal,tax(sal)
+  2  from emp;
+
+ENAME             SAL   TAX(SAL)
+---------- ---------- ----------
+SMITH             800          0
+ALLEN            1600         16
+WARD             1250       12.5
+JONES            2975       59.5
+MARTIN           1250       12.5
+BLAKE            2850         57
+CLARK            2450         49
+SCOTT            3000        120
+KING             5000        200
+TURNER           1500         15
+ADAMS            1100         11
+
+ENAME             SAL   TAX(SAL)
+---------- ---------- ----------
+JAMES             950          0
+FORD             3000        120
+MILLER           1300         13
+
+已选择14行。
+
+
+--函数传入部门编码号，返回所在部门的人数
+SQL> create or replace function getCount(pDeptno number) return number
+  2  is
+  3     res number ;
+  4  begin
+  5     select count(*) into res
+  6     from emp
+  7     where deptno = pDeptno;
+  8     return res;
+  9  end;
+ 10  /
+
+函数已创建。
+
+SQL>
+SQL> select getCount(10) from dual;
+
+GETCOUNT(10)
+------------
+           3
+
+用&符号来自定义输入值
+SQL> select getCount(&no) from dual;
+输入 no 的值:  20
+原值    1: select getCount(&no) from dual
+新值    1: select getCount(20) from dual
+
+GETCOUNT(20)
+------------
+           5
+
+
+使用某个表中某个字段的数据类型作为函数参数的数据类型
+如下：使用emp表中deptno的数据类型作为参数pDeptno的数据类型
+create or replace function getCount(pDeptno emp.deptno%type) return number...
+
+
+
+
+--过程：可以不返回数据，可以独立调用
+--测试过程：exec 过程名，如下：exec myproe(10)
+SQL> create or replace procedure myproc(vDeptno emp.deptno%type)
+  2  is
+  3     vCount number := 0;
+  4  begin
+  5     select count(*) into vCount
+  6     from emp
+  7     where deptno = vDeptno;
+  8     dbms_output.put_line(vCount);
+  9  end;
+ 10  /
+
+过程已创建。
+
+SQL>
+SQL> exec myproc(10)
+3
+
+PL/SQL 过程已成功完成。
+
+
+--有输出参数的过程及调用方法
+SQL> create or replace procedure calcu_emp(
+  2     v_deptno emp.deptno%type,
+  3     v_sum_sal out emp.sal%type,
+  4     v_avg_sal out emp.sal%type)
+  5  is
+  6  begin
+  7     select sum(sal),avg(sal) into v_sum_sal,v_avg_sal
+  8     from emp
+  9     where deptno = v_deptno;
+ 10  end;
+ 11  /
+
+过程已创建。
+
+有输出参数的过程的调用方法
+SQL> declare
+  2     v_sum number;
+  3     v_avG number;
+  4  begin
+  5     calcu_emp(10,v_sum,v_avg);
+  6     dbms_output.put_line('sum: '|| v_sum);
+  7     dbms_output.put_line('avg: '|| v_avg);
+  8  end;
+  9  /
+sum: 8750
+avg: 2916.67
+
+PL/SQL 过程已成功完成。
+
+
+
+
+
+
+
+--功能：修改员工薪水
+--输入参数：员工编码和薪水
+--如果员工的职位不是MANAGER或者PRESIDENT,且薪水高于15000，则报错；
+--否则，则修改员工薪水。
+
+SQL> create or replace procedure changeSal(
+  2     p_empno emp.empno%type,
+  3     p_sal emp.sal%type)
+  4  is
+  5     v_job emp.job%type;
+  6  begin
+  7     select job into v_job
+  8     from emp
+  9     where empno = p_empno;
+ 10
+ 11     if(v_job not in ('MANAGER','PRESIDENT')
+ 12             and p_sal > 15000) then
+ 13             dbms_output.put_line('条件不满足');
+ 14     else
+ 15             update emp set sal = p_sal
+ 16             where empno = p_empno;
+ 17     end if;
+ 18  exception
+ 19     when others then
+ 20             dbms_output.put_line('Error appear!');
+ 21  end;
+ 22  /
+
+过程已创建。
+
+SQL> exec changeSal(7788,20000);
+条件不满足
+
+PL/SQL 过程已成功完成。
+
+SQL> select ename,sal,job
+  2  from emp
+  3  where empno = 7788;
+
+ENAME             SAL JOB
+---------- ---------- ---------
+SCOTT            3000 ANALYST

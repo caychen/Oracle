@@ -1,0 +1,7 @@
+SQL> desc dept;
+ 名称                                      是否为空? 类型
+ ----------------------------------------- -------- -------------
+
+ DEPTNO                                    NOT NULL NUMBER(2)
+ DNAME                                              VARCHAR2(14)
+ LOC                                                VARCHAR2(13)

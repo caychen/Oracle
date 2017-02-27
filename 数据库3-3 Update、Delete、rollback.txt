@@ -1,0 +1,87 @@
+复制表：包括表结构和数据
+create table stu_dup
+as
+select * from student;
+
+复制表结构，不全部复制数据（如果where的条件是false，则只复制表结构而不复制表数据；如果有部分条件满足，则只复制部分数据	）
+create table stu_bak
+as
+select * from student
+where id = 101；
+
+
+
+
+Update:
+修改单一字段
+将id为102的学生的major id改为2
+SQL> update student set mid = 2
+  2  where id = 102;
+
+修改多个字段，使用逗号分隔开
+SQL> update student set id = 104,
+  2  name = 'cay' ,mid = 3
+  3  where id = 101;
+
+
+
+
+delete [from] table_name where 条件exp;
+例如：
+	delete from student where id = 1;
+
+
+truncate table student;//清空表数据，但不删除表
+
+delete / truncate 是立即将事务生效的，rollback则无法返回之前的数据或者表
+
+
+-----rollback
+
+SQL> create table tmp(id number primary key);
+
+表已创建。
+
+SQL> insert into tmp values(1);
+
+已创建 1 行。
+
+SQL> savepoint A;
+
+保存点已创建。
+
+SQL> insert into tmp values(2);
+
+已创建 1 行。
+
+SQL> savepoint B;
+
+保存点已创建。
+
+SQL> insert into tmp values(3);
+
+已创建 1 行。
+
+SQL> savepoint C;
+
+保存点已创建。
+
+现在有三个还原点A,B,C；
+如果运行rollback to B;语句，则还原点C就失去，不再存在
+
+SQL> rollback to b;
+
+回退已完成。
+
+SQL> select * from tmp;
+
+        ID
+----------
+         1
+         2
+
+SQL> rollback to c;
+rollback to c
+*
+第 1 行出现错误:
+ORA-01086: 从未在此会话中创建保存点 'C' 或者该保存点无效

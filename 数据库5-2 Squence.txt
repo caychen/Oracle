@@ -1,0 +1,77 @@
+--序列Squence
+--一种数据库对象，主要用于生成主键值
+
+--nextval：查询序列的下一个值
+--currval：查询序列的当前值
+--注意：建完序列之后，需要先执行nextval，才能进行currval的取值
+
+创建序列
+SQL> create sequence seq_cay;
+删除序列
+SQL> drop sequence seq_cay;
+
+序列已创建。
+
+SQL> select seq_cay.nextval from dual;
+
+   NEXTVAL
+----------
+         1
+
+SQL> /
+
+   NEXTVAL
+----------
+         2
+
+SQL> /
+
+   NEXTVAL
+----------
+         3
+
+通过序列往表中插入数据
+
+SQL> create table mytem(id number primary key);
+
+表已创建。
+
+SQL> insert into mytem values(seq_cay.nextval);
+
+已创建 1 行。
+
+SQL> /
+
+已创建 1 行。
+
+SQL> /
+
+已创建 1 行。
+
+SQL> /
+
+已创建 1 行。
+
+SQL> select * from mytem;
+
+        ID
+----------
+         5
+         6
+         7
+         8
+
+SQL> insert into mytem values(seq_cay.currval);
+insert into mytem values(seq_cay.currval)
+*
+第 1 行出现错误:
+ORA-00001: 违反唯一约束条件 (SCOTT.SYS_C0011186)
+
+
+创建开始值为1000，步进为10的序列
+SQL> create sequence temp
+  2  start with 1000
+  3  increment by 10;
+
+序列已创建。
+

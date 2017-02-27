@@ -1,0 +1,92 @@
+--子查询：查询语句出现在条件中
+
+--行内视图（匿名视图）：查询语句出现在from后面
+select ename,sal
+from emp e join 
+	(select deptno, avg(sal) avgsal
+	from emp group by deptno) a
+on e.deptno = a.deptno
+and e.sal > a.avgsal;
+
+//下面的两个字段是oracle独有的，所以仅适用于oracle
+--伪列（行号）：rownum
+--物理地址：rowid
+
+SQL> select rownum ,ename,job,rowid from emp;
+
+    ROWNUM ENAME      JOB       ROWID
+---------- ---------- --------- ------------------
+         1 SMITH      CLERK     AAAR3sAAEAAAACXAAA
+         2 ALLEN      SALESMAN  AAAR3sAAEAAAACXAAB
+         3 WARD       SALESMAN  AAAR3sAAEAAAACXAAC
+         4 JONES      MANAGER   AAAR3sAAEAAAACXAAD
+         5 MARTIN     SALESMAN  AAAR3sAAEAAAACXAAE
+         6 BLAKE      MANAGER   AAAR3sAAEAAAACXAAF
+         7 CLARK      MANAGER   AAAR3sAAEAAAACXAAG
+         8 SCOTT      ANALYST   AAAR3sAAEAAAACXAAH
+         9 KING       PRESIDENT AAAR3sAAEAAAACXAAI
+        10 TURNER     SALESMAN  AAAR3sAAEAAAACXAAJ
+        11 ADAMS      CLERK     AAAR3sAAEAAAACXAAK
+
+    ROWNUM ENAME      JOB       ROWID
+---------- ---------- --------- ------------------
+        12 JAMES      CLERK     AAAR3sAAEAAAACXAAL
+        13 FORD       ANALYST   AAAR3sAAEAAAACXAAM
+        14 MILLER     CLERK     AAAR3sAAEAAAACXAAN
+
+
+
+--rownum不能从中间开始，只能从第一条开始
+SQL> select rownum,ename
+  2  from emp
+  3  where rownum > 5 and rownum < 10;
+
+未选定行
+
+--实现查询第M条到第N条的数据的方法
+SQL> select ename,sal
+  2  from (select rownum rn , ename ,sal
+  3             from emp)
+  4  where rn > 5 and rn < 10;
+
+ENAME             SAL
+---------- ----------
+BLAKE            2850
+CLARK            2450
+SCOTT            3000
+KING             5000
+
+--原理：
+先用行内查询产生一个视图，在视图中新建一个rn列，然后通过列rn的范围来获取数据
+
+
+注意：oracle中将null设为最大的值，如果需要得到最高的N条数据的时候，需要将某些排序字段为空的行数据排除在外
+
+--排名问题：Top-N问题分析
+1、查找薪水最高的三个人
+下面是错误的方法：
+SQL> select ename,sal
+  2  from emp
+  3  where rownum < 4
+  4  order by sal desc;
+
+ENAME             SAL
+---------- ----------
+ALLEN            1600
+WARD             1250
+SMITH             800
+
+
+下面是正确的方法：
+SQL> select ename,sal
+  2  from (select ename,sal
+  3     from emp
+  4	where sal is not null
+  5     order by sal desc)
+  6  where rownum < 4;
+
+ENAME             SAL
+---------- ----------
+KING             5000
+SCOTT            3000
+FORD             3000

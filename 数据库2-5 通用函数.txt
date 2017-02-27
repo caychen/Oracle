@@ -1,0 +1,81 @@
+通用函数：nvl / coalesce / decode
+
+空值处理函数：nvl
+奖金为空的话，给予值100
+SQL> select ename, comm ,nvl(comm,100) comm from emp;
+
+ENAME            COMM       COMM
+---------- ---------- ----------
+SMITH                        100
+ALLEN             300        300
+WARD              500        500
+JONES                        100
+MARTIN           1400       1400
+BLAKE                        100
+CLARK                        100
+SCOTT                        100
+KING                         100
+TURNER              0          0
+ADAMS                        100
+
+ENAME            COMM       COMM
+---------- ---------- ----------
+JAMES                        100
+FORD                         100
+MILLER                       100
+
+
+空值处理函数：coalesce 
+返回第一个非空表达式
+如果有奖金则返回奖金，如果无奖金，则返回sal*0.1，如果还为空，则返回100作为comm1的值
+SQL> select ename,sal,comm,coalesce(comm,sal*0.1,100) comm1 from emp;
+
+ENAME             SAL       COMM      COMM1
+---------- ---------- ---------- ----------
+SMITH             800                    80
+ALLEN            1600        300        300
+WARD             1250        500        500
+JONES            2975                 297.5
+MARTIN           1250       1400       1400
+BLAKE            2850                   285
+CLARK            2450                   245
+SCOTT            3000                   300
+KING             5000                   500
+TURNER           1500          0          0
+ADAMS            1100                   110
+
+ENAME             SAL       COMM      COMM1
+---------- ---------- ---------- ----------
+JAMES             950                    95
+FORD             3000                   300
+MILLER           1300                   130
+
+
+条件转换函数：decode
+1、如果职位为MANAGER，则Bounds为工资的1.5倍，如果是ANALYST，则Bounds为工资的1.3倍，如果是SALESMAN，则为工资的1.1倍，其余不变
+SQL> select ename,job,sal,
+  2  decode(job,'MANAGER',sal*1.5,
+  3             'ANALYST',sal*1.3,
+  4             'SALESMAN',sal*1.1,
+  5             sal) "Bounds"
+  6  from emp;
+
+ENAME      JOB              SAL     Bounds
+---------- --------- ---------- ----------
+SMITH      CLERK            800        800
+ALLEN      SALESMAN        1600       1760
+WARD       SALESMAN        1250       1375
+JONES      MANAGER         2975     4462.5
+MARTIN     SALESMAN        1250       1375
+BLAKE      MANAGER         2850       4275
+CLARK      MANAGER         2450       3675
+SCOTT      ANALYST         3000       3900
+KING       PRESIDENT       5000       5000
+TURNER     SALESMAN        1500       1650
+ADAMS      CLERK           1100       1100
+
+ENAME      JOB              SAL     Bounds
+---------- --------- ---------- ----------
+JAMES      CLERK            950        950
+FORD       ANALYST         3000       3900
+MILLER     CLERK           1300       1300

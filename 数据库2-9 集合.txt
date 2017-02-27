@@ -1,0 +1,83 @@
+union / union all : 并集（union去重，union all不去重）
+intersect ： 交集
+minus ： 差集
+
+A = {1,2,3,4,5,6}
+B = {2,4,6,8}
+
+A union B = {1,2,3,4,5,6,8}
+A union all B = {1,2,2,3,4,4,5,6,6,8}
+A intersect B = {2,4,6}
+A minus B = {1,3,5}
+
+
+
+将没有上司的人认为是经理,则改为"BOSS"
+SQL> select worker.ename,manager.ename
+  2  from emp worker join emp manager
+  3  on worker.mgr = manager.empno
+  4  union all
+  5  select ename,'BOSS'
+  6  from emp
+  7  where mgr is null;
+
+ENAME      ENAME
+---------- ----------
+FORD       JONES
+SCOTT      JONES
+TURNER     BLAKE
+ALLEN      BLAKE
+WARD       BLAKE
+JAMES      BLAKE
+MARTIN     BLAKE
+MILLER     CLARK
+ADAMS      SCOTT
+BLAKE      KING
+JONES      KING
+CLARK      KING
+SMITH      FORD
+KING       BOSS
+
+查找部门10或20的所有职位（去重）
+SQL> select job from emp where deptno=10
+  2  union
+  3  select job from emp where deptno=20;
+
+JOB
+---------
+ANALYST
+CLERK
+MANAGER
+PRESIDENT
+
+同上
+SQL> select distinct job from emp
+  2  where deptno in (10,20);
+
+JOB
+---------
+CLERK
+PRESIDENT
+MANAGER
+ANALYST
+
+
+部门10和20都有的职位
+SQL> select job from emp where deptno=10
+  2  intersect
+  3  select job from emp where deptno=20;
+
+JOB
+---------
+CLERK
+MANAGER
+
+
+查找在部门10中而不在部门20中出现的职位
+SQL> select job from emp where deptno = 10
+  2  minus
+  3  select job from emp where deptno = 20;
+
+JOB
+---------
+PRESIDENT

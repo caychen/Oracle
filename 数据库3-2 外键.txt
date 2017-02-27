@@ -1,0 +1,82 @@
+SQL> create table major(
+  2  mid number primary key,
+  3  mname varchar2(30));
+
+
+SQL> create table student(
+  2  id number primary key,
+  3  name varchar2(20),
+  4  mid number ,
+  5  constraint stu_mid_fk foreign key(mid) references major(mid));
+
+
+SQL> select constraint_name,constraint_type
+  2  from user_constraints
+  3  where table_name='STUDENT';
+
+CONSTRAINT_NAME                C
+------------------------------ -
+SYS_C0011136                   P
+STU_MID_FK                     R
+
+
+SQL> select * from major;
+
+       MID MNAME
+---------- ---------------
+         1 music
+         2 movie
+         3 dance
+
+
+SQL> select * from student;
+
+        ID NAME                        MID
+---------- -------------------- ----------
+       101 peter                         1
+       102 chris                         3
+       103 king                          2
+
+
+--------------------------------------------------------------------
+
+如果试图添加父表中不存在的主键作为子表中的外键，则添加不成功会报错。
+例如：
+SQL> insert into student values(104,'cay',10);
+insert into student values(104,'cay',10)
+*
+第 1 行出现错误:
+ORA-02291: 违反完整约束条件 (SCOTT.STU_MID_FK) - 未找到父项关键字
+
+
+如果试图删除父表中的一行，而这一行的主键在子表中被参照了，则删除不成功会报错。
+例如：
+SQL> delete from major
+  2  where mid = 1;
+delete from major
+*
+第 1 行出现错误:
+ORA-02292: 违反完整约束条件 (SCOTT.STU_MID_FK) - 已找到子记录
+
+
+
+
+
+--在建立子表，外键约束增加设定条件
+--on delete cascade：在删除父表中某主键的行后，连同将子表外键参照父表主键的行删除
+SQL> create table student(
+  2  id number primary key,
+  3  name varchar2(20),
+  4  mid number ,
+  5  constraint stu_mid_fk foreign key(mid) references major(mid)
+  6  on delete cascade);
+
+
+--on delete set null：在删除父表中某主键的行后，将子表外键参照父表主键的行的外键设为空null
+SQL> create table student(
+  2  id number primary key,
+  3  name varchar2(20),
+  4  mid number ,
+  5  constraint stu_mid_fk foreign key(mid) references major(mid)
+  6  on delete set null);
+

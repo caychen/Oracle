@@ -1,0 +1,316 @@
+SQL操作
+查询表中全部列数据
+select * from tablename;
+
+查询特定列数据
+select colName1, colName2, ..., colNameN , from tablename;
+
+别名as，as可省略
+select colName （as） newColName from tablename;	则colName的别名为NEWCOLNAME
+
+默认列名都大写，如果需要改成自定义写法，请使用引号
+select colName （as） "newColName" from tablename;  则colName的别名为"newColName" 
+
+别名中有空格的话，必须用引号
+
+
+空值转换函数函数：nvl
+	nvl(colname,value) colname=value;
+nvl(colname,value):如果colname的值为null，就设为默认的value；否则不变
+
+||:字符串拼接
+select ename || ' work as ' || job (as) employee from emp;
+
+
+去除重复的字段:distinct
+去除职位相同的行，只保留一次
+select distinct job from emp;
+distinct对后面的字段都适合，如下对deptno和job字段都满足
+select distinct deptno,job from emp;
+
+
+条件：where
+------------------------------------------------------------------
+绑定变量(替代变量)
+例子1：
+select ename,deptno
+from emp
+where sal > 1000;
+
+例子2：
+select ename ,deptno ,job
+from emp
+where deptno = &no;
+输入 no 的值:  10
+原值    3: where deptno = &no
+新值    3: where deptno = 10
+
+ENAME          DEPTNO JOB
+---------- ---------- ---------
+CLARK              10 MANAGER
+KING               10 PRESIDENT
+MILLER             10 CLERK
+
+例子3：
+SQL> select ename ,sal
+  2  from emp
+  3  where sal > &sal;
+输入 sal 的值:  2000
+原值    3: where sal > &sal
+新值    3: where sal > 2000
+
+ENAME             SAL
+---------- ----------
+JONES            2975
+BLAKE            2850
+CLARK            2450
+SCOTT            3000
+KING             5000
+FORD             3000
+
+例子4：字符串数值要用单引号，而且大小写敏感
+SQL> select ename ,job
+  2  from emp
+  3  where job = 'manager';
+未选定行
+
+注意与下面的区别：
+SQL>  select ename ,job
+  2   from emp
+  3   where job = 'MANAGER';
+
+ENAME      JOB
+---------- ---------
+JONES      MANAGER
+BLAKE      MANAGER
+CLARK      MANAGER
+
+例子5：如果需要绑定数据为字符串的时候，要在&value两边加单引号
+SQL> SELECT ENAME
+  2  FROM EMP
+  3  WHERE JOB = '&JOB'
+  4  ;
+输入 job 的值:  MANAGER
+原值    3: WHERE JOB = '&JOB'
+新值    3: WHERE JOB = 'MANAGER'
+
+ENAME
+----------
+JONES
+BLAKE
+CLARK
+
+------------------------------------------------------------------
+区间：between（闭区间）[low，high]
+SQL> select ename ,sal
+  2  from emp
+  3
+SQL> select ename,sal
+  2  from emp
+  3  where sal between 1000 and 3000;
+
+ENAME             SAL
+---------- ----------
+ALLEN            1600
+WARD             1250
+JONES            2975
+MARTIN           1250
+BLAKE            2850
+CLARK            2450
+SCOTT            3000
+TURNER           1500
+ADAMS            1100
+FORD             3000
+MILLER           1300
+
+------------------------------------------------------------------
+区间离散值：in （value1,value2,value3,...,valueN）
+数字型
+SQL> select ename ,job,deptno
+  2  from emp
+  3  where deptno in (10,30);
+
+ENAME      JOB           DEPTNO
+---------- --------- ----------
+ALLEN      SALESMAN          30
+WARD       SALESMAN          30
+MARTIN     SALESMAN          30
+BLAKE      MANAGER           30
+CLARK      MANAGER           10
+KING       PRESIDENT         10
+TURNER     SALESMAN          30
+JAMES      CLERK             30
+MILLER     CLERK             10
+
+字符串型：要使用大写
+SQL> select ename ,job
+  2  from emp
+  3  where job in ('MANAGER','ANALYST');
+
+ENAME      JOB
+---------- ---------
+JONES      MANAGER
+BLAKE      MANAGER
+CLARK      MANAGER
+SCOTT      ANALYST
+FORD       ANALYST
+
+------------------------------------------------------------------
+模糊匹配
+通配符：like  （%：0或多个字符，_：占位符）
+1、查找姓名首字母为M的姓名和职位
+SQL> select ename ,job
+  2  from emp
+  3  where ename like 'M%';
+
+ENAME      JOB
+---------- ---------
+MARTIN     SALESMAN
+MILLER     CLERK
+
+2、查找姓名中第二个字母为A的姓名
+SQL> select ename
+  2  from emp
+  3  where ename like '_A%';
+
+ENAME
+----------
+WARD
+MARTIN
+JAMES
+
+3、转义:escape '\'
+SQL> select ename
+  2  from emp
+  3  where ename like 'A\_%' escape '\';
+
+------------------------------------------------------------------
+空值：null
+查询奖金数为空的信息
+SQL> select ename ,job,comm from emp
+  2  where comm is null;
+
+ENAME      JOB             COMM
+---------- --------- ----------
+SMITH      CLERK
+JONES      MANAGER
+BLAKE      MANAGER
+CLARK      MANAGER
+SCOTT      ANALYST
+KING       PRESIDENT
+ADAMS      CLERK
+JAMES      CLERK
+FORD       ANALYST
+MILLER     CLERK
+
+
+------------------------------------------------------------------
+等于：	=
+不等于：!= , <>
+非 ：	not  （not between, not in , not null, not like）
+
+and优先级比or高
+1、查询在部门10里且工资大于1000，或者部门为20的信息
+SQL> select ename , sal, deptno from emp
+  2  where sal >= 1000
+  3  and deptno = 10
+  4  or deptno = 20;
+
+ENAME             SAL     DEPTNO
+---------- ---------- ----------
+SMITH             800         20
+JONES            2975         20
+CLARK            2450         10
+SCOTT            3000         20
+KING             5000         10
+ADAMS            1100         20
+FORD             3000         20
+MILLER           1300         10
+
+2、查询部门为10或20，且工资大于1000的信息
+SQL> select ename , sal, deptno from emp
+  2  where sal >= 1000
+  3  and (deptno = 10
+  4  or deptno = 20);
+
+ENAME             SAL     DEPTNO
+---------- ---------- ----------
+JONES            2975         20
+CLARK            2450         10
+SCOTT            3000         20
+KING             5000         10
+ADAMS            1100         20
+FORD             3000         20
+MILLER           1300         10
+
+
+------------------------------------------------------------------排序：order by  放在select最后
+默认正序，如需倒序，在最后加上desc
+1、查询工资大于1500，并按照工资从低到高排序
+SQL> select ename ,sal from emp
+  2  where sal > 1500
+  3  order by sal;
+
+ENAME             SAL
+---------- ----------
+ALLEN            1600
+CLARK            2450
+BLAKE            2850
+JONES            2975
+FORD             3000
+SCOTT            3000
+KING             5000
+
+2、先按部门从小到大，部门中再按工资从大到小排序
+SQL> select ename ,sal,deptno
+  2  from emp
+  3  order by deptno,sal desc;
+
+ENAME             SAL     DEPTNO
+---------- ---------- ----------
+KING             5000         10
+CLARK            2450         10
+MILLER           1300         10
+SCOTT            3000         20
+FORD             3000         20
+JONES            2975         20
+ADAMS            1100         20
+SMITH             800         20
+BLAKE            2850         30
+ALLEN            1600         30
+TURNER           1500         30
+MARTIN           1250         30
+WARD             1250         30
+JAMES             950         30
+
+3、查询工资大于1500中，按部门从小到大，部门中再按工资从大到小排序
+SQL> select ename ,sal,deptno
+  2  from emp
+  3  where sal > 1500
+  4  order by deptno,sal desc;
+
+ENAME             SAL     DEPTNO
+---------- ---------- ----------
+KING             5000         10
+CLARK            2450         10
+FORD             3000         20
+SCOTT            3000         20
+JONES            2975         20
+BLAKE            2850         30
+ALLEN            1600         30
+
+4、按照select选择的指定字段排序，如下例子中的2代表第二个字段sal：
+SQL> select ename ,sal
+  2  from emp
+  3  where sal>1500
+  4  order by 2;
+
+ENAME             SAL
+---------- ----------
+ALLEN            1600
+CLARK            2450
+BLAKE            2850
+JONES            2975
+FORD             3000
+SCOTT            3000
+KING             5000

@@ -1,0 +1,150 @@
+子查询：将子查询嵌入到主查询中去
+步骤：先进行子查询，然后将子查询的结果作为主查询的条件
+
+注意：
+如果子查询返回一个数据，可以使用=,>,<,>=,<=等单行比较运算符
+如果子查询返回多个数据，必须使用多行比较运算符in
+如果在子查询中返回结果中有null值，且使用not in运算符，则无结果
+
+
+
+非关联子查询
+------------------------------------------------------------------
+1、查找薪水大于FORD薪水的员工信息
+方法1：
+SQL> select sal
+  2  from emp
+  3  where ename='FORD';
+
+       SAL
+----------
+      3000
+
+SQL> select ename
+  2  from emp
+  3  where sal > 3000;
+
+ENAME
+----------
+KING
+
+方法2：
+SQL> select ename
+  2  from emp
+  3  where sal >
+  4  (select sal
+  5  from emp
+  6  where ename = 'FORD');
+
+ENAME
+----------
+KING
+
+2、查找工资最低的员工信息
+SQL> select ename,sal
+  2  from emp
+  3  where sal =
+  4  (select min(sal)
+  5  from emp);
+
+ENAME             SAL
+---------- ----------
+SMITH             800
+
+
+
+
+
+SQL> select ename,job
+  2  from emp
+  3  where deptno in
+  4     (select deptno from emp
+  5     where job='ANALYST');
+
+ENAME      JOB
+---------- ---------
+FORD       ANALYST
+ADAMS      CLERK
+SCOTT      ANALYST
+JONES      MANAGER
+SMITH      CLERK
+
+
+
+多列子查询
+1、每个部门薪水最高的人
+SQL> select deptno,ename,sal
+  2  from emp
+  3  where (deptno,sal) in
+  4     (select deptno,max(sal) from emp
+  5     group by deptno);
+
+    DEPTNO ENAME             SAL
+---------- ---------- ----------
+        30 BLAKE            2850
+        20 FORD             3000
+        20 SCOTT            3000
+        10 KING             5000
+
+
+having子查询：
+1、查找平均薪水大于部门20的平均薪水的部门
+SQL> select deptno, avg(sal) from emp
+  2  group by deptno
+  3  having avg(sal) >
+  4     (select avg(sal) from emp
+  5     where deptno=20);
+
+    DEPTNO   AVG(SAL)
+---------- ----------
+        10 2916.66667
+
+
+
+
+关联子查询
+------------------------------------------------------------------
+1、哪些员工比同部门的平均薪水高
+SQL> select ename,sal,deptno
+  2  from emp outer
+  3  where sal >
+  4     (select avg(sal) from emp
+  5     where deptno = outer.deptno);
+
+ENAME             SAL     DEPTNO
+---------- ---------- ----------
+ALLEN            1600         30
+JONES            2975         20
+BLAKE            2850         30
+SCOTT            3000         20
+KING             5000         10
+FORD             3000         20
+
+
+exists
+1、查找有下属的员工信息
+SQL> select ename from emp outer
+  2  where exists
+  3     (select 'a' from emp
+  4     where mgr = outer.empno);
+
+ENAME
+----------
+JONES
+BLAKE
+CLARK
+SCOTT
+KING
+FORD
+
+
+2、查找没有员工的部门信息
+SQL> select dname
+  2  from dept outer
+  3  where not exists
+  4     (select 'a' from emp
+  5     where deptno = outer.deptno);
+
+DNAME
+--------------
+OPERATIONS

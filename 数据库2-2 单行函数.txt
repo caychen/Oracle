@@ -1,0 +1,128 @@
+可以加在select语句中
+
+Oracle特有虚表：dual
+
+大小写函数：UPPER, LOWER, INITCAP
+1、
+SQL> select lower('SQL') from dual;
+
+LOW
+---
+sql
+
+2、
+SQL> select ename
+  2  from emp
+  3  where upper(ename) = 'SCOTT';
+
+ENAME
+----------
+SCOTT
+
+
+字符函数：
+upper, lower, initcap, substr, length, lpad, rpad, replace, trim
+
+1、拼接concat
+SQL> select concat('hello',' world') from dual;
+
+CONCAT('HEL
+-----------
+hello world
+
+2、子串substr
+SQL> select substr('helloworld',3,4) from dual;
+
+SUBS
+----
+llow
+
+3、长度length
+SQL> select length('hello wrold') from dual;
+
+LENGTH('HELLOWROLD')
+--------------------
+                  11
+
+4、左补位lpad
+SQL> select lpad('123',10,'@') from dual;
+
+LPAD(123,1
+----------
+@@@@@@@123
+
+5、右补位rpad
+SQL> select rpad('123',10,'@') from dual;
+
+RPAD(123,1
+----------
+123@@@@@@@
+
+6、替换replace
+SQL> select replace('hello world','hello','i love') from dual;
+
+REPLACE('HEL
+------------
+i love world
+
+7、去除左右两边的空格
+SQL> select trim('         hello    world          ') from dual;
+
+TRIM('HELLOWOR
+--------------
+hello    world
+
+------------------------------------------------------------------
+数字函数
+round， trunc， mod
+
+1、四舍五入round
+SQL> select round(34.3456,2) from dual;
+
+ROUND(34.3456,2)
+----------------
+           34.35
+
+SQL> select round(34.3456,0) from dual;
+
+ROUND(34.3456,0)
+----------------
+              34
+
+SQL> select round(34.3456,-1) from dual;
+
+ROUND(34.3456,-1)
+-----------------
+               30
+
+SQL> select round(35.3456,-1) from dual;
+
+ROUND(35.3456,-1)
+-----------------
+               40
+
+2、截取trunc
+SQL> select trunc(34.3456,2) from dual;
+
+TRUNC(34.3456,2)
+----------------
+           34.34
+
+SQL> select trunc(35.3456,0) from dual;
+
+TRUNC(35.3456,0)
+----------------
+              35
+
+SQL> select trunc(35.3456,-1) from dual;
+
+TRUNC(35.3456,-1)
+-----------------
+               30
+
+3、取模mod
+SQL> select mod(16,5) from dual;
+
+ MOD(16,5)
+----------
+         1

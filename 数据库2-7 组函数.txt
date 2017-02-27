@@ -1,0 +1,120 @@
+max / min / sum / count / avg
+组函数忽略空值，即只计算非空值
+比如某字段中共有20个数据，其中10个数据为空，则count算出来为10，而不是20
+
+SQL> select comm from emp;//一共14行
+
+      COMM
+----------
+
+       300
+       500
+
+      1400
+
+
+
+
+         0
+
+
+
+
+
+
+SQL> select sum(comm) from emp;
+
+ SUM(COMM)
+----------
+      2200
+
+
+SQL> select count(comm) from emp;
+
+COUNT(COMM)
+-----------
+          4
+
+SQL> select avg(comm) from emp;
+
+ AVG(COMM)
+----------
+       550
+
+从上面的例子可以看出sum, count, avg是专门处理非空值的函数
+如果需要平均每个员工的奖金，需要使用如下语句：
+SQL> select sum(comm)/count(*) from emp;
+
+SUM(COMM)/COUNT(*)
+------------------
+        157.142857
+
+或者：
+SQL> select avg(nvl(comm,0)) from emp;
+
+AVG(NVL(COMM,0))
+----------------
+      157.142857
+
+
+分组：group by
+注意点：
+（1）在select后面的所有非组函数的字段必须出现在group by后面，不然会报错
+（2）出现的group by后面的字段，不一定出现在select后面，但是信息不完整
+结论：为了数据完整性，建议将select后面的非组函数的字段与group by后面的字段保持一致
+
+1、按部门分组，得到每个部门的全部薪水
+SQL> select deptno,sum(sal)
+  2  from emp
+  3  group by deptno;
+
+    DEPTNO   SUM(SAL)
+---------- ----------
+        30       9400
+        20      10875
+        10       8750
+
+2、按职位分组，得到每个职位的平均薪水
+SQL> select job,avg(sal)
+  2  from emp
+  3  group by job;
+
+JOB         AVG(SAL)
+--------- ----------
+CLERK         1037.5
+SALESMAN        1400
+PRESIDENT       5000
+MANAGER   2758.33333
+ANALYST         3000
+
+3、按照每个部门，每个职位，得到平均薪水
+SQL> select deptno, job ,avg(sal)
+  2  from emp
+  3  group by deptno,job;
+
+    DEPTNO JOB         AVG(SAL)
+---------- --------- ----------
+        20 CLERK            950
+        30 SALESMAN        1400
+        20 MANAGER         2975
+        30 CLERK            950
+        10 PRESIDENT       5000
+        30 MANAGER         2850
+        10 CLERK           1300
+        10 MANAGER         2450
+        20 ANALYST         3000
+
+
+
+------------------------------------------------------------------
+---凡是对组函数过滤，使用having
+
+SQL>  select deptno,count(*)
+  2   from emp
+  3   group by deptno
+  4   having count(*)>=5;
+
+    DEPTNO   COUNT(*)
+---------- ----------
+        30          6
+        20          5

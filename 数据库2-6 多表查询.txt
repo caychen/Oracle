@@ -1,0 +1,220 @@
+pk/fk：约束关系，用来保证数据的完整性
+primary key：主键
+foreign key：外键
+
+外键用来表示表间关系：一对多
+
+dept：主键被参照，也称为主表或者父表
+emp： 外键参照dept表，所以也称为从表或者子表
+
+t1表和t2表做内连接
+t1 join t2: t1表做驱动表，t2表做匹配表
+
+内连接：等值连接 / 非等值连接 / 自连接
+内连接核心：以条件作为关联，任何一张表里的记录一定在另一张表中存在匹配的记录，才能出现在最后的结果集中，否则不会出现在结果集中
+
+------------------------------------------------------------------
+等值连接： = 
+连接条件：on t1.c1 = t2.c2
+
+1、
+SQL> select emp.ename,emp.job ,dept.dname
+  2  from emp join dept
+  3  on emp.deptno=dept.deptno;
+
+ENAME      JOB       DNAME
+---------- --------- --------------
+CLARK      MANAGER   ACCOUNTING
+KING       PRESIDENT ACCOUNTING
+MILLER     CLERK     ACCOUNTING
+JONES      MANAGER   RESEARCH
+FORD       ANALYST   RESEARCH
+ADAMS      CLERK     RESEARCH
+SMITH      CLERK     RESEARCH
+SCOTT      ANALYST   RESEARCH
+WARD       SALESMAN  SALES
+TURNER     SALESMAN  SALES
+ALLEN      SALESMAN  SALES
+
+ENAME      JOB       DNAME
+---------- --------- --------------
+JAMES      CLERK     SALES
+BLAKE      MANAGER   SALES
+MARTIN     SALESMAN  SALES
+
+
+2、先使用and过滤掉不是'MANAGER'的人，然后进行连接
+SQL> select emp.ename ,dept.dname
+  2  from emp join dept
+  3  on emp.deptno=dept.deptno
+  4  and emp.job='MANAGER';
+
+ENAME      DNAME
+---------- --------------
+CLARK      ACCOUNTING
+JONES      RESEARCH
+BLAKE      SALES
+
+------------------------------------------------------------------
+非等值连接: between and
+SQL> select emp.ename,emp.sal,salgrade.grade
+  2  from emp join salgrade
+  3  on emp.sal between salgrade.losal and salgrade.hisal;
+
+ENAME             SAL      GRADE
+---------- ---------- ----------
+SMITH             800          1
+JAMES             950          1
+ADAMS            1100          1
+WARD             1250          2
+MARTIN           1250          2
+MILLER           1300          2
+TURNER           1500          3
+ALLEN            1600          3
+CLARK            2450          4
+BLAKE            2850          4
+JONES            2975          4
+
+ENAME             SAL      GRADE
+---------- ---------- ----------
+SCOTT            3000          4
+FORD             3000          4
+KING             5000          5
+
+
+------------------------------------------------------------------
+自连接（自关联）： 使用别名作为两张表来进行查询连接
+SQL> select worker.ename, manager.ename
+  2  from emp worker join emp manager
+  3  on worker.mgr = manager.empno;
+
+ENAME      ENAME
+---------- ----------
+FORD       JONES
+SCOTT      JONES
+TURNER     BLAKE
+ALLEN      BLAKE
+WARD       BLAKE
+JAMES      BLAKE
+MARTIN     BLAKE
+MILLER     CLARK
+ADAMS      SCOTT
+BLAKE      KING
+JONES      KING
+
+ENAME      ENAME
+---------- ----------
+CLARK      KING
+SMITH      FORD
+
+
+
+
+
+------------------------------------------------------------------
+
+外连接：[left / right / full] outer join
+
+t1 left outer join t2 == t2 right outer join t1
+
+t1 right outer join t2 == t2 left outer join t1
+
+全外连接：t1 full outer join t2
+
+
+t1 left outer join t2：
+内连接的结果 + t1在t2中匹配不到的数据的集合
+
+t1 right outer join t2：
+内连接的结果 + t2在t1中匹配不到的数据的集合
+
+t1 full outer join t2：
+内连接的结果 + t1在t2中匹配不到的数据 + t2在t1中匹配不到的数据的集合
+
+SQL> select e.ename,d.dname
+  2  from emp e left outer join dept d
+  3  on e.deptno = d.deptno;
+
+ENAME      DNAME
+---------- --------------
+MILLER     ACCOUNTING
+KING       ACCOUNTING
+CLARK      ACCOUNTING
+FORD       RESEARCH
+ADAMS      RESEARCH
+SCOTT      RESEARCH
+JONES      RESEARCH
+SMITH      RESEARCH
+JAMES      SALES
+TURNER     SALES
+BLAKE      SALES
+
+ENAME      DNAME
+---------- --------------
+MARTIN     SALES
+WARD       SALES
+ALLEN      SALES
+Cay
+
+SQL> select worker.ename ,manager.ename
+  2  from emp worker left outer join emp manager
+  3  on worker.mgr = manager.empno;
+
+ENAME      ENAME
+---------- ----------
+FORD       JONES
+SCOTT      JONES
+JAMES      BLAKE
+TURNER     BLAKE
+MARTIN     BLAKE
+WARD       BLAKE
+ALLEN      BLAKE
+MILLER     CLARK
+ADAMS      SCOTT
+CLARK      KING
+BLAKE      KING
+
+ENAME      ENAME
+---------- ----------
+JONES      KING
+SMITH      FORD
+Cay
+KING
+
+
+外连接+匹配表pk is null表示否定、不是、不包括等等
+
+1、查询哪些员工没有下属，即不是别人的领导
+SQL> select manager.ename
+  2  from emp worker right outer join emp manager
+  3  on worker.mgr = manager.empno
+  4  where worker.empno is null;
+
+ENAME
+----------
+SMITH
+ALLEN
+WARD
+MARTIN
+TURNER
+ADAMS
+JAMES
+MILLER
+
+
+2、
+（1）先用and过滤出SMITH所在的部门
+（2）外连接，dept做驱动表，得到结果集=有smith的部门（内连接的结果集）+没有smith的部门（驱动表中匹配不到的记录和null值的组合）
+（3）用匹配表的pk is null过滤掉内连接的结果集
+
+SQL> select d.dname
+  2  from emp e right outer join dept d
+  3  on e.deptno=d.deptno
+  4  and e.ename='SMITH'
+  5  where e.empno is null;
+
+DNAME
+--------------
+ACCOUNTING
+SALES
+OPERATIONS

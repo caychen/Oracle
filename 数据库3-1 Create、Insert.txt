@@ -1,0 +1,168 @@
+unique : 唯一，可空（可重复，因为空不等于空）
+not null ：非空 ，可重复
+check ：检查, 可以不写，但如果写则只能在指定的数值中选择其一
+primary key : pk主键 = unique + not null
+foreign key ：fk外键
+
+
+建表
+SQL>  create table student (
+  2   id number primary key,
+  3   name varchar2(20),
+  4   email char(40),
+  5   birthday date default sysdate);
+
+表已创建。
+
+SQL> desc student
+ 名称                                      是否为空? 类型
+ ----------------------------------------- -------- -------------
+
+ ID                                        NOT NULL NUMBER
+ NAME                                               VARCHAR2(20)
+ EMAIL                                              CHAR(40)
+ BIRTHDAY                                           DATE
+
+
+插入数据
+（1）如果需要插入的字段为表的全部字段，表后面可以省略字段名称，如例2
+（2）如果插入的字段不是全部字段，则表后面的字段不能省略，必须指明要插入的字段,如例3
+（3）带values的sql语句，一次只能增加一条
+例1、
+SQL> insert into student(id,name,email,birthday)
+  2  values(1,'Cay','111@qq.com',sysdate);
+
+SQL> select * from student;
+
+        ID NAME    EMAIL		BIRTHDAY
+---------- ------- -------------------- -------------------
+         1 Cay     111@qq.com		31-3月 -15
+
+SQL> insert into student(id,name,email)
+  2  values(2,'Amy','123@qq.com');
+
+例2、增加全部字段，可以省略表后面的字段名称
+SQL> insert into student
+  2  values(3,'Hello','1212@qq.com',to_date('1990-11-28','YYYY-MM-DD'));
+
+例3：不是全部字段， 只增加id和姓名字段，则必须指明字段
+SQL> insert into student(id,name)
+  2  values(4,'kitty');
+
+
+
+----一次增加多条数据
+SQL> insert into student(id,name)
+  2  select empno,ename
+  3  from emp
+  4  where deptno = 10;
+
+
+
+
+
+查找约束条件
+SQL> select constraint_name,constraint_type
+  2  from user_constraints
+  3  where table_name='******';    *****表示表名
+
+
+（一）创建主键约束，可以建立在列级和表级两种方式
+1、创建主键约束，不命名，则由系统命令，建立在列级，SYS_C******;
+SQL>  create table student (
+  2   id number primary key,
+  3   name varchar2(20),
+  4   email char(40),
+  5   birthday date default sysdate);
+
+
+SQL> select constraint_name,constraint_type
+  2  from user_constraints
+  3  where table_name='STUDENT';
+
+CONSTRAINT_NAME                C
+------------------------------ -
+SYS_C0011118                   P
+
+
+
+
+2、创建主键约束，自己命令，建立在表级
+--约束条件命名方式为：stu_id_pk（表名_字段_约束条件类型）
+SQL> create table student1(
+  2  id number,
+  3  name varchar2(20),
+  4  constraint stu_id_pk primary key(id));
+
+SQL> select constraint_name,constraint_type
+  2  from user_constraints
+  3  where table_name='STUDENT1';
+
+CONSTRAINT_NAME                C
+------------------------------ -
+STU_ID_PK                      P
+
+
+
+3、建表后创建主键约束
+SQL> create table student2(
+  2  id number,
+  3  name varchar2(20));
+
+SQL> alter table student2
+  2  add constraint stu2_id_pk primary key(id);
+
+SQL>  select constraint_name,constraint_type
+  2   from user_constraints
+  3   where table_name='STUDENT2';
+
+CONSTRAINT_NAME                C
+------------------------------ -
+STU2_ID_PK                     P
+
+
+-----了解主键约束条件的作用
+（1）重复执行插入的主键值相同的sql语句，将返回ORA-00001违反唯一约束
+（2）如果不提供主键值，将返回“无法将 NULL 插入。。。”的错
+误信息
+
+
+
+
+（二）创建非空约束，只能建立在列级上
+SQL> create table student1(
+  2  id number primary key,
+  3  name varchar2(20) not null);
+
+SQL> select constraint_name,constraint_type
+  2  from user_constraints
+  3  where table_name='STUDENT1';
+
+CONSTRAINT_NAME                C
+------------------------------ -
+SYS_C0011130                   C
+SYS_C0011131                   P
+
+
+
+
+（三）创建唯一约束,可以建立在列级和表级
+----email的唯一约束建立在列级
+----nickname的唯一约束建立在表级
+SQL> create table student1(
+  2  id number primary key,
+  3  name varchar2(20),
+  4  nickname varchar2(20),
+  5  email char(20) unique,
+  6  constraint stu_nickname_u unique(nickname));
+
+
+SQL> select constraint_name,constraint_type
+  2  from user_constraints
+  3  where table_name='STUDENT1';
+
+CONSTRAINT_NAME                C
+------------------------------ -
+SYS_C0011132                   P
+SYS_C0011133                   U
+STU_NICKNAME_U                 U

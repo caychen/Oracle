@@ -1,0 +1,138 @@
+table：表
+view：视图
+sqeuence：序列
+index：索引
+object：对象
+
+
+默认scott用户没有建view的权限，先登录system,然后赋予scott建view的权限：grant create view to scott;
+
+视图view只是一个虚表:
+create [or replace] view view_name  
+as
+select deptno ,ename from emp;
+
+（1）如果不加or replace，则重复创建则会报视图已存在的错误；
+（2）如果加or replace，则如果不存在，则创建视图view，如果存在，则替换新的视图
+
+
+SQL> create view tmp
+  2  as
+  3  select ename,sal from emp;
+
+视图已创建。
+
+SQL> desc tmp;
+ 名称                                      是否为空? 类型
+ ----------------------------------------- -------- ------------
+
+ ENAME                                              VARCHAR2(10)
+ SAL                                                NUMBER(7,2)
+
+SQL> select * from tmp;
+
+ENAME             SAL
+---------- ----------
+SMITH             800
+ALLEN            1600
+WARD             1250
+JONES            2975
+MARTIN           1250
+BLAKE            2850
+CLARK            2450
+SCOTT            3000
+KING             5000
+TURNER           1500
+ADAMS            1100
+
+ENAME             SAL
+---------- ----------
+JAMES             950
+FORD             3000
+MILLER           1300
+
+已选择14行。
+
+删除视图
+drop view tmp;
+
+
+--数据字典
+
+当前用户的数据表：user_tables;只读
+
+select count(*) from user_tables;--查看数据表的个数
+
+desc user_tables;--查看数据表的结构
+
+select table_name from user_tables;--显示全部表
+
+select table_name from user_tables where rownum < 20;--查看前19个表名
+
+select * from user_tables where table_name = 'EMP';--查看emp表的信息
+
+
+当前用户的数据视图：user_views;
+select count(*) from user_views;--查看数据视图的总数
+
+desc user_views;--查看数据视图的结构
+
+
+select text from user_views where view_name = 'TMP';
+SQL语句：
+SQL> select text from user_views where view_name = 'TMP';
+
+TEXT
+---------------------------------------------------------
+
+select ename,sal from emp
+
+
+
+--复杂视图
+SQL> create or replace view tmp
+  2  as
+  3  select deptno,sum(sal) sum_sal
+  4  from emp
+  5  group by deptno;
+
+视图已创建。
+
+SQL> desc tmp;
+ 名称                                      是否为空? 类型
+ ----------------------------------------- -------- ----------
+
+ DEPTNO                                             NUMBER(2)
+ SUM_SAL                                            NUMBER
+
+SQL> select * from tmp;
+
+    DEPTNO    SUM_SAL
+---------- ----------
+        30       9400
+        20      10875
+        10       8750
+
+
+
+
+
+数据字典：user_****,all_****,dba_****
+其中****可为tables，views，indexes， objects
+
+user_tables;当前用户名下的所有对象
+all_tables;当前用户能访问的所有的表=自己的表+别的用户允许当前用户访问的表
+dba_tables;数据库下所有的表
+
+
+select count(*) from user_tables;
+select count(*) from user_views;
+select count(*) from all_tables;
+select count(*) from all_views;
+
+
+--索引
+全表扫描FTS(Full Tables Scan)
+
+创建索引的方式：自动/手动
+当创建唯一/主键约束条件时，索引自动创建

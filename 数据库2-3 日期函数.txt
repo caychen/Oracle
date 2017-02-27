@@ -1,0 +1,117 @@
+日期：
+Java：
+Date now = new Date();
+Calender today = Calender.getInstance();
+
+Oracle取系统时间:sysdate(Oracle特有的)
+select sysdate from dual;
++/-：n天以后/以前的日期
+两个日期相减表示前后相差多少天
+
+中文环境和英文环境的区别:
+数字通用，字符串需要对应环境才行
+
+------------------------------------------------------------------
+Oracle数据库中默认的日期格式 ：DD-Mon-RR
+
+假设现在是2011年
+	RR	YY(直接截取当前年份的前两位)
+05	2005	2005
+99	1999	2099
+
+假设现在是1999年
+	RR	YY
+05	2005	1905
+95	1995	1995
+
+RR:取与当前年份最近的年份
+YY：截取当前年份的前两位作为世纪年
+------------------------------------------------------------------
+to_char()：将日期转换为字符类型
+
+日期格式：
+yyyy：四位年
+mm：二位月
+dd：二位日
+hh24：24小时制
+hh12：12小时制
+mi：分钟
+ss：秒
+d：一周内的第几天（周日：1）
+day：全拼的星期几
+year：全拼的年份
+month：全拼的月份
+am/pm:
+
+
+SQL> select to_char(sysdate,'yyyy/mm/dd hh24:mi:ss') from dual;
+
+TO_CHAR(SYSDATE,'YY
+-------------------
+2015/03/28 14:27:32
+
+SQL> select to_char(sysdate,'year month day d') from dual;
+
+TO_CHAR(SYSDATE,'YEARMONTHDAY')
+-----------------------------------------------------------
+twenty fifteen 3月  星期六 7
+
+
+months_between:间隔月数
+1、查询职工入职的月数
+SQL> select ename ,months_between(sysdate,hiredate) as hdate from emp;
+
+ENAME           HDATE
+---------- ----------
+SMITH       411.37492
+ALLEN      409.278146
+WARD        409.21363
+JONES      407.858791
+MARTIN            402
+BLAKE       406.89105
+CLARK      405.632985
+SCOTT      335.310404
+KING        400.37492
+TURNER     402.665243
+ADAMS      334.181372
+
+ENAME           HDATE
+---------- ----------
+JAMES      399.826533
+FORD       399.826533
+MILLER     398.181372
+
+add_months：增加指定的月（注意与直接+6的区别：sysdate+6：6天后）
+SQL> select add_months(sysdate,6) from dual;
+
+ADD_MONTHS(SYS
+--------------
+28-9月 -15
+
+------------------------------------------------------------------
+next_day:下一个周几的日期
+1、下一个周四
+SQL> select next_day(sysdate,5) from dual;
+
+NEXT_DAY(SYSDA
+--------------
+02-4月 -15
+
+2、下一个周五（中文环境下）
+SQL> select next_day(sysdate,'星期五') FROM DUAL;
+
+NEXT_DAY(SYSDA
+--------------
+03-4月 -15
+
+下一个FRI（英文环境下）
+SQL> select next_day(sysdate,'FRI') FROM DUAL;
+
+------------------------------------------------------------------
+最后一天：last_day
+1、查询本月的最后一天的日期
+SQL> select last_day(sysdate) from dual;
+
+LAST_DAY(SYSDA
+--------------
+31-3月 -15

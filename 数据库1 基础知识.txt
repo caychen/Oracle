@@ -1,0 +1,52 @@
+Oracle数据库：DB
+DBMS:(Database Manager System)数据库管理系统
+DBA :(Database Administrator)数据库使用者
+
+数据库种类：
+oracle / sybase /db2(IBM)
+sql server / mysql
+access
+
+数据表：行（Row）和列（Col）组成
+行： row / record
+列：column / field
+
+结构化查询语言(SQL):Structured Query Language
+数据定义语言（DDL Data Definition Language）
+数据操作语言（DML Data Manipulation Language）
+事务控制语言（TCL Transaction Control Language）
+数据查询语言（DQL Data Query Language）
+数据控制语言（DCL Data Control Language）
+
+SQL分类
+DQL: SELECT
+DML: INSERT / UPDATE / DELETE
+DDL: CREATE / DROP / ALTER / TRUNCATE
+DCL: GRANT（给予） / REVOKE（撤销）
+TCL: COMMIT / ROLLBACK / SAVEPOINT
+
+
+//描述表结构信息:desc
+desc table
+
+数据类型：
+数字类型：number(n)
+浮点型: number(p,s) ---->最长p位(不算小数点),小数点后s位
+字符类型：char(n)---->定长字符串 / varchar2(n)----->可变字符串
+日期：date
+
+例子：number
+number ： 随便，整数和浮点型都可以
+number(7,2)--->最大99999.99
+number(7)--->最大9999999
+char：空间浪费大，查询快
+varchar：空间节省，查询慢
+
+数字类型：	右对齐
+字符串类型： 	左对齐
+
+Oracle数据库用户：
+sys：DBA （Oracle老大）
+system
+scott：普通用户
+...
